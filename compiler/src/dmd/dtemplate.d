@@ -3816,12 +3816,6 @@ extern (C++) class TemplateInstance : ScopeDsymbol
         return "template instance";
     }
 
-    override bool oneMember(out Dsymbol ps, Identifier ident)
-    {
-        ps = null;
-        return true;
-    }
-
     override final const(char)* toPrettyCharsHelper()
     {
         OutBuffer buf;
@@ -5496,11 +5490,6 @@ extern (C++) final class TemplateMixin : TemplateInstance
     override const(char)* kind() const
     {
         return "mixin";
-    }
-
-    override bool oneMember(out Dsymbol ps, Identifier ident)
-    {
-        return Dsymbol.oneMember(ps, ident);
     }
 
     override bool hasPointers()

@@ -29,7 +29,6 @@ class AttribDeclaration : public Dsymbol
 public:
     Dsymbols *decl;     // array of Dsymbol's
     const char *kind() const override;
-    bool oneMember(Dsymbol *&ps, Identifier *ident) override;
     bool hasPointers() override final;
     bool hasStaticCtorOrDtor() override final;
     void checkCtorConstInit() override final;
@@ -44,7 +43,6 @@ public:
     StorageClass stc;
 
     StorageClassDeclaration *syntaxCopy(Dsymbol *s) override;
-    bool oneMember(Dsymbol *&ps, Identifier *ident) override final;
     StorageClassDeclaration *isStorageClassDeclaration() override { return this; }
 
     void accept(Visitor *v) override { v->visit(this); }
@@ -143,7 +141,6 @@ public:
     Dsymbols *elsedecl; // array of Dsymbol's for else block
 
     ConditionalDeclaration *syntaxCopy(Dsymbol *s) override;
-    bool oneMember(Dsymbol *&ps, Identifier *ident) override final;
     void accept(Visitor *v) override { v->visit(this); }
 };
 
@@ -170,7 +167,6 @@ public:
     Dsymbols *cache;
 
     StaticForeachDeclaration *syntaxCopy(Dsymbol *s) override;
-    bool oneMember(Dsymbol *&ps, Identifier *ident) override;
     const char *kind() const override;
     void accept(Visitor *v) override { v->visit(this); }
 };

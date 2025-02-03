@@ -178,6 +178,12 @@ Dsymbols* include(Dsymbol d, Scope* sc)
     return dmd.dsymbolsem.include(d, sc);
 }
 
+bool oneMember(Dsymbol d, out Dsymbol ps, Identifier ident)
+{
+    import dmd.dsymbolsem;
+    return dmd.dsymbolsem.oneMember(d, ps, ident);
+}
+
 /***********************************************************
  * dtemplate.d
  */

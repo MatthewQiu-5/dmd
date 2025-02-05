@@ -143,7 +143,6 @@ public:
     Dsymbols *elsedecl; // array of Dsymbol's for else block
 
     ConditionalDeclaration *syntaxCopy(Dsymbol *s) override;
-    bool oneMember(Dsymbol *&ps, Identifier *ident) override final;
     void accept(Visitor *v) override { v->visit(this); }
 };
 

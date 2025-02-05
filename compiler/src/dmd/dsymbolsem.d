@@ -7940,3 +7940,47 @@ extern (C++) class AddCommentVisitor: Visitor
     }
     override void visit(StaticForeachDeclaration sfd) {}
 }
+
+
+//MYTODO
+/**************************************
+    * Determine if this symbol is only one.
+    * Returns:
+    *      false, ps = null: There are 2 or more symbols
+    *      true,  ps = null: There are zero symbols
+    *      true,  ps = symbol: The one and only one symbol
+    */
+extern(C++) bool oneMember(Dsymbol d, out Dsymbol ps, Identifier ident)
+{
+    scope v = new OneMemberVisitor(ps, ident);
+    d.accept(v);
+    return v.result;
+}
+private extern(C++) class OneMemberVisitor : Visitor 
+{
+    alias visit = Visitor.visit;
+    Dsymbol* ps;
+    Identifier ident;
+    bool result;
+    this(out Dsymbol ps, Identifier ident)
+    {
+        this.ps = &ps;
+        this.ident = ident;
+    }
+
+    override void visit(ConditionalDeclaration cd)
+    {
+        //printf("ConditionalDeclaration::oneMember(), inc = %d\n", condition.inc);
+        if (cd.condition.inc != Include.notComputed)
+        {
+            Dsymbols* d = cd.condition.include(null) ? cd.decl : cd.elsedecl;
+            result = Dsymbol.oneMembers(d, *ps, ident);
+        }
+        else
+        {
+            bool res = (Dsymbol.oneMembers(cd.decl, *ps, ident) && ps is null && Dsymbol.oneMembers(cd.elsedecl, *ps, ident) && ps is null);
+            *ps = null;
+            result = res;
+        }
+    }
+};

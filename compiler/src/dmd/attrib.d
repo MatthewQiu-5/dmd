@@ -596,22 +596,6 @@ extern (C++) class ConditionalDeclaration : AttribDeclaration
         return new ConditionalDeclaration(loc, condition.syntaxCopy(), Dsymbol.arraySyntaxCopy(decl), Dsymbol.arraySyntaxCopy(elsedecl));
     }
 
-    override final bool oneMember(out Dsymbol ps, Identifier ident)
-    {
-        //printf("ConditionalDeclaration::oneMember(), inc = %d\n", condition.inc);
-        if (condition.inc != Include.notComputed)
-        {
-            Dsymbols* d = condition.include(null) ? decl : elsedecl;
-            return Dsymbol.oneMembers(d, ps, ident);
-        }
-        else
-        {
-            bool res = (Dsymbol.oneMembers(decl, ps, ident) && ps is null && Dsymbol.oneMembers(elsedecl, ps, ident) && ps is null);
-            ps = null;
-            return res;
-        }
-    }
-
     override void accept(Visitor v)
     {
         v.visit(this);

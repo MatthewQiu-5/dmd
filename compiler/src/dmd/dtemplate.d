@@ -745,7 +745,9 @@ extern (C++) final class TemplateDeclaration : ScopeDsymbol
 
     override bool hasStaticCtorOrDtor()
     {
-        return false; // don't scan uninstantiated templates
+        import dmd.dsymbolsem;
+        return dmd.dsymbolsem.hasStaticCtorOrDtor(this);
+        // return false; // don't scan uninstantiated templates
     }
 
     override const(char)* kind() const

@@ -908,8 +908,10 @@ extern (C++) class Dsymbol : ASTNode
 
     bool hasStaticCtorOrDtor()
     {
-        //printf("Dsymbol::hasStaticCtorOrDtor() %s\n", toChars());
-        return false;
+        import dmd.dsymbolsem;
+        return dmd.dsymbolsem.hasStaticCtorOrDtor(this);
+        // //printf("Dsymbol::hasStaticCtorOrDtor() %s\n", toChars());
+        // return false;
     }
 
     void addObjcSymbols(ClassDeclarations* classes, ClassDeclarations* categories)
@@ -1317,16 +1319,18 @@ public:
      */
     override bool hasStaticCtorOrDtor()
     {
-        if (members)
-        {
-            for (size_t i = 0; i < members.length; i++)
-            {
-                Dsymbol member = (*members)[i];
-                if (member.hasStaticCtorOrDtor())
-                    return true;
-            }
-        }
-        return false;
+        import dmd.dsymbolsem;
+        return dmd.dsymbolsem.hasStaticCtorOrDtor(this);
+        // if (members)
+        // {
+        //     for (size_t i = 0; i < members.length; i++)
+        //     {
+        //         Dsymbol member = (*members)[i];
+        //         if (member.hasStaticCtorOrDtor())
+        //             return true;
+        //     }
+        // }
+        // return false;
     }
 
     override final inout(ScopeDsymbol) isScopeDsymbol() inout

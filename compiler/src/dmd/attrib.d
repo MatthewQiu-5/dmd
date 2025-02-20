@@ -122,7 +122,9 @@ extern (C++) abstract class AttribDeclaration : Dsymbol
 
     override final bool hasStaticCtorOrDtor()
     {
-        return this.include(null).foreachDsymbol( (s) { return s.hasStaticCtorOrDtor(); } ) != 0;
+        import dmd.dsymbolsem;
+        return dmd.dsymbolsem.hasStaticCtorOrDtor(this);
+        // return this.include(null).foreachDsymbol( (s) { return s.hasStaticCtorOrDtor(); } ) != 0;
     }
 
     override final void checkCtorConstInit()

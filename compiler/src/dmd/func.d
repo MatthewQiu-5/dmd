@@ -1566,9 +1566,11 @@ extern (C++) class StaticCtorDeclaration : FuncDeclaration
         return false;
     }
 
-    override final bool hasStaticCtorOrDtor() @nogc nothrow pure @safe
+    override final bool hasStaticCtorOrDtor()
     {
-        return true;
+        import dmd.dsymbolsem;
+        return dmd.dsymbolsem.hasStaticCtorOrDtor(this);
+        // return true;
     }
 
     override final inout(StaticCtorDeclaration) isStaticCtorDeclaration() inout @nogc nothrow pure @safe
@@ -1649,7 +1651,9 @@ extern (C++) class StaticDtorDeclaration : FuncDeclaration
 
     override final bool hasStaticCtorOrDtor()
     {
-        return true;
+        import dmd.dsymbolsem;
+        return dmd.dsymbolsem.hasStaticCtorOrDtor(this);
+        // return true;
     }
 
     override final bool addPreInvariant()

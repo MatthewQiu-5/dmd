@@ -117,7 +117,9 @@ extern (C++) abstract class AttribDeclaration : Dsymbol
 
     override final bool hasPointers()
     {
-        return this.include(null).foreachDsymbol( (s) { return s.hasPointers(); } ) != 0;
+        import dmd.dsymbolsem;
+        return dmd.dsymbolsem.hasPointers(this);
+        // return this.include(null).foreachDsymbol( (s) { return s.hasPointers(); } ) != 0;
     }
 
     override final bool hasStaticCtorOrDtor()

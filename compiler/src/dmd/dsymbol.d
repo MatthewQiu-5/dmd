@@ -902,8 +902,10 @@ extern (C++) class Dsymbol : ASTNode
      */
     bool hasPointers()
     {
-        //printf("Dsymbol::hasPointers() %s\n", toChars());
-        return false;
+        import dmd.dsymbolsem;
+        return dmd.dsymbolsem.hasPointers(this);
+        // //printf("Dsymbol::hasPointers() %s\n", toChars());
+        // return false;
     }
 
     bool hasStaticCtorOrDtor()

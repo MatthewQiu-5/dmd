@@ -5512,8 +5512,10 @@ extern (C++) final class TemplateMixin : TemplateInstance
 
     override bool hasPointers()
     {
-        //printf("TemplateMixin.hasPointers() %s\n", toChars());
-        return members.foreachDsymbol( (s) { return s.hasPointers(); } ) != 0;
+        import dmd.dsymbolsem;
+        return dmd.dsymbolsem.hasPointers(this);
+        // //printf("TemplateMixin.hasPointers() %s\n", toChars());
+        // return members.foreachDsymbol( (s) { return s.hasPointers(); } ) != 0;
     }
 
     extern (D) bool findTempDecl(Scope* sc)

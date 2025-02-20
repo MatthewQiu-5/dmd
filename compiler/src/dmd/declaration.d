@@ -1076,8 +1076,10 @@ extern (C++) class VarDeclaration : Declaration
 
     override final bool hasPointers()
     {
-        //printf("VarDeclaration::hasPointers() %s, ty = %d\n", toChars(), type.ty);
-        return (!isDataseg() && type.hasPointers());
+        import dmd.dsymbolsem;
+        return dmd.dsymbolsem.hasPointers(this);
+        // //printf("VarDeclaration::hasPointers() %s, ty = %d\n", toChars(), type.ty);
+        // return (!isDataseg() && type.hasPointers());
     }
 
     /*************************************

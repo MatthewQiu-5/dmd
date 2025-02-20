@@ -291,7 +291,6 @@ public:
     bool isThreadlocal() override final;
     bool isCTFE();
     bool isOverlappedWith(VarDeclaration *v);
-    bool hasPointers() override final;
     bool canTakeAddressOf();
     bool needsScopeDtor();
     Dsymbol *toAlias() override final;

@@ -32,7 +32,7 @@ import dmd.dmodule;
 import dmd.dscope;
 import dmd.dstruct;
 import dmd.dsymbol;
-import dmd.dsymbolsem;
+import dmd.dsymbolsem : hasPointers;
 import dmd.dtemplate;
 import dmd.enumsem;
 import dmd.errors;

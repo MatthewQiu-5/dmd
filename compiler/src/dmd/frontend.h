@@ -601,7 +601,6 @@ public:
     virtual bool needThis();
     virtual Visibility visible();
     virtual Dsymbol* syntaxCopy(Dsymbol* s);
-    virtual bool hasPointers();
     virtual bool hasStaticCtorOrDtor();
     virtual void addObjcSymbols(Array<ClassDeclaration* >* classes, Array<ClassDeclaration* >* categories);
     virtual void addComment(const char* comment);
@@ -1808,7 +1807,6 @@ public:
     TypeQualified* tqual;
     TemplateInstance* syntaxCopy(Dsymbol* s) override;
     const char* kind() const override;
-    bool hasPointers() override;
     void accept(Visitor* v) override;
 };
 
@@ -4895,7 +4893,6 @@ class Nspace final : public ScopeDsymbol
 public:
     Expression* identExp;
     Nspace* syntaxCopy(Dsymbol* s) override;
-    bool hasPointers() override;
     const char* kind() const override;
     void accept(Visitor* v) override;
 };
@@ -6397,7 +6394,6 @@ class AttribDeclaration : public Dsymbol
 public:
     Array<Dsymbol* >* decl;
     const char* kind() const override;
-    bool hasPointers() final override;
     bool hasStaticCtorOrDtor() final override;
     void addObjcSymbols(Array<ClassDeclaration* >* classes, Array<ClassDeclaration* >* categories) final override;
     void accept(Visitor* v) override;
@@ -6881,7 +6877,6 @@ public:
     bool isThreadlocal() final override;
     bool isCTFE();
     bool isOverlappedWith(VarDeclaration* v);
-    bool hasPointers() final override;
     bool canTakeAddressOf();
     bool needsScopeDtor();
     Dsymbol* toAlias() final override;

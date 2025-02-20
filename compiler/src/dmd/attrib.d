@@ -110,11 +110,6 @@ extern (C++) abstract class AttribDeclaration : Dsymbol
         return "attribute";
     }
 
-    override final bool hasPointers()
-    {
-        return this.include(null).foreachDsymbol( (s) { return s.hasPointers(); } ) != 0;
-    }
-
     override final bool hasStaticCtorOrDtor()
     {
         return this.include(null).foreachDsymbol( (s) { return s.hasStaticCtorOrDtor(); } ) != 0;

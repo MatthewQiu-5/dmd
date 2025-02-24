@@ -24,7 +24,6 @@ import dmd.dscope;
 import dmd.dsymbol;
 import dmd.errors;
 import dmd.expression;
-import dmd.expressionsem : evalStaticCondition;
 import dmd.globals;
 import dmd.identifier;
 import dmd.location;
@@ -326,35 +325,8 @@ extern (C++) final class DebugCondition : DVCondition
 
     override int include(Scope* sc)
     {
-        //printf("DebugCondition::include() level = %d, debuglevel = %d\n", level, global.params.debuglevel);
-        if (inc != Include.notComputed)
-        {
-            return inc == Include.yes;
-        }
-        inc = Include.no;
-        bool definedInModule = false;
-        if (ident)
-        {
-            if (mod.debugids && findCondition(*mod.debugids, ident))
-            {
-                inc = Include.yes;
-                definedInModule = true;
-            }
-            else if (findCondition(global.debugids, ident))
-                inc = Include.yes;
-            else
-            {
-                if (!mod.debugidsNot)
-                    mod.debugidsNot = new Identifiers();
-                mod.debugidsNot.push(ident);
-            }
-        }
-        else if (global.params.debugEnabled)
-            inc = Include.yes;
-
-        if (!definedInModule)
-            printDepsConditional(sc, this, "depsDebug ");
-        return (inc == Include.yes);
+        import dmd.expressionsem;
+        return dmd.expressionsem.include(this, sc);
     }
 
     override inout(DebugCondition) isDebugCondition() inout
@@ -390,7 +362,7 @@ extern (C++) final class VersionCondition : DVCondition
      * Returns:
      *   `true` if it is reserved, `false` otherwise
      */
-    extern(D) private static bool isReserved(const(char)[] ident) @safe
+    extern(D) public static bool isReserved(const(char)[] ident) @safe
     {
         // This list doesn't include "D_*" versions, see the last return
         switch (ident)
@@ -601,37 +573,8 @@ extern (C++) final class VersionCondition : DVCondition
 
     override int include(Scope* sc)
     {
-        //printf("VersionCondition::include() level = %d, versionlevel = %d\n", level, global.params.versionlevel);
-        //if (ident) printf("\tident = '%s'\n", ident.toChars());
-        if (inc != Include.notComputed)
-        {
-            return inc == Include.yes;
-        }
-
-        inc = Include.no;
-        bool definedInModule = false;
-        if (ident)
-        {
-            if (mod.versionids && findCondition(*mod.versionids, ident))
-            {
-                inc = Include.yes;
-                definedInModule = true;
-            }
-            else if (findCondition(global.versionids, ident))
-                inc = Include.yes;
-            else
-            {
-                if (!mod.versionidsNot)
-                    mod.versionidsNot = new Identifiers();
-                mod.versionidsNot.push(ident);
-            }
-        }
-        if (!definedInModule &&
-            (!ident || (!isReserved(ident.toString()) && ident != Id._unittest && ident != Id._assert)))
-        {
-            printDepsConditional(sc, this, "depsVersion ");
-        }
-        return (inc == Include.yes);
+       import dmd.expressionsem;
+       return dmd.expressionsem.include(this, sc);
     }
 
     override inout(VersionCondition) isVersionCondition() inout
@@ -664,43 +607,8 @@ extern (C++) final class StaticIfCondition : Condition
 
     override int include(Scope* sc)
     {
-        // printf("StaticIfCondition::include(sc = %p) this=%p inc = %d\n", sc, this, inc);
-
-        int errorReturn()
-        {
-            if (!global.gag)
-                inc = Include.no; // so we don't see the error message again
-            return 0;
-        }
-
-        if (inc != Include.notComputed)
-        {
-            return inc == Include.yes;
-        }
-
-        if (!sc)
-        {
-            error(loc, "`static if` conditional cannot be at global scope");
-            inc = Include.no;
-            return 0;
-        }
-
-        import dmd.staticcond;
-        bool errors;
-
-        bool result = evalStaticCondition(sc, exp, exp, errors);
-
-        // Prevent repeated condition evaluation.
-        // See: fail_compilation/fail7815.d
-        if (inc != Include.notComputed)
-            return (inc == Include.yes);
-        if (errors)
-            return errorReturn();
-        if (result)
-            inc = Include.yes;
-        else
-            inc = Include.no;
-        return (inc == Include.yes);
+        import dmd.expressionsem;
+        return dmd.expressionsem.include(this, sc);
     }
 
     override void accept(Visitor v)

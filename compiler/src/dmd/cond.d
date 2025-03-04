@@ -24,7 +24,7 @@ import dmd.dscope;
 import dmd.dsymbol;
 import dmd.errors;
 import dmd.expression;
-import dmd.expressionsem : expressionSemantic, evalStaticCondition;
+import dmd.expressionsem : expressionSemantic;
 import dmd.globals;
 import dmd.identifier;
 import dmd.location;

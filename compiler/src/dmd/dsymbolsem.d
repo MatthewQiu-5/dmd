@@ -8641,3 +8641,28 @@ private extern(C++) class FinalizeSizeVisitor : Visitor
         sd.argTypes = target.toArgTypes(sd.type);
     }
 }
+
+/***************************************
+ * Search sd for a member function of the form:
+ *   `extern (D) string toString();`
+ * Params:
+ *   sd = struct declaration to search
+ * Returns:
+ *   FuncDeclaration of `toString()` if found, `null` if not
+ */
+FuncDeclaration search_toString(StructDeclaration sd)
+{
+    Dsymbol s = search_function(sd, Id.tostring);
+    FuncDeclaration fd = s ? s.isFuncDeclaration() : null;
+    if (fd)
+    {
+        __gshared TypeFunction tftostring;
+        if (!tftostring)
+        {
+            tftostring = new TypeFunction(ParameterList(), Type.tstring, LINK.d);
+            tftostring = tftostring.merge().toTypeFunction();
+        }
+        fd = fd.overloadExactMatch(tftostring);
+    }
+    return fd;
+}

@@ -30,6 +30,7 @@ import dmd.dclass;
 import dmd.denum;
 import dmd.dstruct;
 import dmd.dsymbol;
+import dmd.dsymbolsem : search_toString;
 import dmd.dtemplate;
 import dmd.errors;
 import dmd.expression;

@@ -133,14 +133,6 @@ void gendocfile(Module m, const char* ddoctext_ptr, size_t ddoctext_length,
 }
 
 /***********************************************************
- * dstruct.d
- */
-FuncDeclaration search_toString(StructDeclaration sd)
-{
-    return dmd.dstruct.search_toString(sd);
-}
-
-/***********************************************************
  * dsymbolsem.d
  */
 void dsymbolSemantic(Dsymbol dsym, Scope* sc)
@@ -196,6 +188,12 @@ bool isAbstract(ClassDeclaration cd)
 {
     import dmd.dsymbolsem;
     return dmd.dsymbolsem.isAbstract(cd);
+}
+
+FuncDeclaration search_toString(StructDeclaration sd)
+{
+    import dmd.dsymbolsem;
+    return dmd.dsymbolsem.search_toString(sd);
 }
 
 /***********************************************************

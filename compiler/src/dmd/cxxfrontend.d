@@ -198,6 +198,12 @@ bool isAbstract(ClassDeclaration cd)
     return dmd.dsymbolsem.isAbstract(cd);
 }
 
+bool isPOD(StructDeclaration sd)
+{
+    import dmd.dsymbolsem;
+    return dmd.dsymbolsem.isPOD(sd);
+}
+
 /***********************************************************
  * dtemplate.d
  */

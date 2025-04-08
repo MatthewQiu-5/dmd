@@ -108,6 +108,7 @@ private:
 bool isPOD(Type t)
 {
     auto baseType = t.baseElemOf();
+    import dmd.dsymbolsem : isPOD;
     if (auto ts = baseType.isTypeStruct())
         return ts.sym.isPOD();
     return true;

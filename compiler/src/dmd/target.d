@@ -1029,6 +1029,7 @@ extern (C++) struct Target
             tns = tns.baseElemOf();
             if (auto ts = tns.isTypeStruct())
             {
+                import dmd.dsymbolsem;
                 auto sd = ts.sym;
                 if (tf.linkage == LINK.cpp && needsThis)
                     return true;
@@ -1094,6 +1095,7 @@ extern (C++) struct Target
 
         if (auto ts = tns.isTypeStruct())
         {
+            import dmd.dsymbolsem : isPOD;
             auto sd = ts.sym;
             if (os == Target.OS.linux && tf.linkage != LINK.d && isX86)
             {

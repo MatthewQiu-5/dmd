@@ -23,7 +23,6 @@ import dmd.declaration;
 import dmd.dmodule;
 import dmd.dscope;
 import dmd.dsymbol;
-import dmd.dsymbolsem : search, setFieldOffset;
 import dmd.dtemplate;
 import dmd.errors;
 import dmd.expression;
@@ -37,7 +36,7 @@ import dmd.mtype;
 import dmd.opover;
 import dmd.target;
 import dmd.tokens;
-import dmd.typesem : isZeroInit, merge, size, hasPointers;
+import dmd.typesem : merge, hasPointers;
 import dmd.typinf;
 import dmd.visitor;
 
@@ -177,71 +176,6 @@ extern (C++) class StructDeclaration : AggregateDeclaration
                 hasFieldWithInvariant = true;
         }
         computedTypeProperties = true;
-    }
-
-    /***************************************
-     * Determine if struct is POD (Plain Old Data).
-     *
-     * POD is defined as:
-     *      $(OL
-     *      $(LI not nested)
-     *      $(LI no postblits, destructors, or assignment operators)
-     *      $(LI no `ref` fields or fields that are themselves non-POD)
-     *      )
-     * The idea being these are compatible with C structs.
-     *
-     * Returns:
-     *     true if struct is POD
-     */
-    final bool isPOD()
-    {
-        // If we've already determined whether this struct is POD.
-        if (ispod != ThreeState.none)
-            return (ispod == ThreeState.yes);
-
-        import dmd.clone;
-
-        bool hasCpCtorLocal;
-        bool hasMoveCtorLocal;
-        bool needCopyCtor;
-        bool needMoveCtor;
-        needCopyOrMoveCtor(this, hasCpCtorLocal, hasMoveCtorLocal, needCopyCtor, needMoveCtor);
-
-        if (enclosing                      || // is nested
-            search(this, loc, Id.postblit) || // has postblit
-            search(this, loc, Id.dtor)     || // has destructor
-            /* This is commented out because otherwise buildkite vibe.d:
-               `canCAS!Task` fails to compile
-             */
-            //hasMoveCtorLocal               || // has move constructor
-            hasCpCtorLocal)                   // has copy constructor
-        {
-            ispod = ThreeState.no;
-            return false;
-        }
-
-        // Recursively check all fields are POD.
-        for (size_t i = 0; i < fields.length; i++)
-        {
-            VarDeclaration v = fields[i];
-            if (v.storage_class & STC.ref_)
-            {
-                ispod = ThreeState.no;
-                return false;
-            }
-
-            if (auto ts = v.type.baseElemOf().isTypeStruct())
-            {
-                if (!ts.sym.isPOD())
-                {
-                    ispod = ThreeState.no;
-                    return false;
-                }
-            }
-        }
-
-        ispod = ThreeState.yes;
-        return true;
     }
 
     /***************************************

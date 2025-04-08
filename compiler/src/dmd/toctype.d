@@ -24,6 +24,7 @@ import dmd.astenums;
 import dmd.declaration;
 import dmd.denum;
 import dmd.dmdparams;
+import dmd.dsymbolsem;
 import dmd.dstruct;
 import dmd.globals;
 import dmd.glue;

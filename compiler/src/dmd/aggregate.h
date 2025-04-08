@@ -48,6 +48,7 @@ namespace dmd
     bool fill(StructDeclaration* sd, Loc loc, Expressions &elements, bool ctorinit);
     bool isFuncHidden(ClassDeclaration* cd, FuncDeclaration* fd);
     Dsymbol* vtblSymbol(ClassDeclaration *cd);
+    bool isPOD(StructDeclaration *sd);
 }
 
 enum class ClassKind : uint8_t

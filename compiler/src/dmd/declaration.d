@@ -605,103 +605,6 @@ extern (C++) final class AliasDeclaration : Declaration
         return toAlias().getType();
     }
 
-    override Dsymbol toAlias()
-    {
-        static if (0)
-        printf("[%s] AliasDeclaration::toAlias('%s', this = %p, aliassym: %s, kind: '%s', inuse = %d)\n",
-            loc.toChars(), toChars(), this, aliassym ? aliassym.toChars() : "", aliassym ? aliassym.kind() : "", inuse);
-        assert(this != aliassym);
-        //static int count; if (++count == 10) *(char*)0=0;
-
-        Dsymbol err()
-        {
-            // Avoid breaking "recursive alias" state during errors gagged
-            if (global.gag)
-                return this;
-            aliassym = new AliasDeclaration(loc, ident, Type.terror);
-            type = Type.terror;
-            return aliassym;
-        }
-        // Reading the AliasDeclaration
-        if (!this.ignoreRead)
-            this.wasRead = true;                 // can never assign to this AliasDeclaration again
-
-        if (inuse == 1 && type && _scope)
-        {
-            inuse = 2;
-            const olderrors = global.errors;
-            Dsymbol s = type.toDsymbol(_scope);
-            //printf("[%s] type = %s, s = %p, this = %p\n", loc.toChars(), type.toChars(), s, this);
-            if (global.errors != olderrors)
-                return err();
-            if (s)
-            {
-                s = s.toAlias();
-                if (global.errors != olderrors)
-                    return err();
-                aliassym = s;
-                inuse = 0;
-            }
-            else
-            {
-                Type t = type.typeSemantic(loc, _scope);
-                if (t.ty == Terror)
-                    return err();
-                if (global.errors != olderrors)
-                    return err();
-                //printf("t = %s\n", t.toChars());
-                inuse = 0;
-            }
-        }
-        if (inuse)
-        {
-            .error(loc, "%s `%s` recursive alias declaration", kind, toPrettyChars);
-            return err();
-        }
-
-        if (semanticRun >= PASS.semanticdone)
-        {
-            // semantic is already done.
-
-            // Do not see aliassym !is null, because of lambda aliases.
-
-            // Do not see type.deco !is null, even so "alias T = const int;` needs
-            // semantic analysis to take the storage class `const` as type qualifier.
-        }
-        else
-        {
-            // stop AliasAssign tuple building
-            if (aliassym)
-            {
-                if (auto td = aliassym.isTupleDeclaration())
-                {
-                    if (td.building)
-                    {
-                        td.building = false;
-                        semanticRun = PASS.semanticdone;
-                        return td;
-                    }
-                }
-            }
-            if (_import && _import._scope)
-            {
-                /* If this is an internal alias for selective/renamed import,
-                 * load the module first.
-                 */
-                _import.dsymbolSemantic(null);
-            }
-            if (_scope)
-            {
-                aliasSemantic(this, _scope);
-            }
-        }
-
-        inuse = 1;
-        Dsymbol s = aliassym ? aliassym.toAlias() : this;
-        inuse = 0;
-        return s;
-    }
-
     override Dsymbol toAlias2()
     {
         if (inuse)
@@ -1159,17 +1062,6 @@ extern (C++) class VarDeclaration : Declaration
         }
 
         return false;
-    }
-
-    override final Dsymbol toAlias()
-    {
-        //printf("VarDeclaration::toAlias('%s', this = %p, aliassym = %p)\n", toChars(), this, aliassym);
-        if ((!type || !type.deco) && _scope)
-            dsymbolSemantic(this, _scope);
-
-        assert(this != aliasTuple);
-        Dsymbol s = aliasTuple ? aliasTuple.toAlias() : this;
-        return s;
     }
 
     override void accept(Visitor v)

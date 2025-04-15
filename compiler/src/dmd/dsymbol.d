@@ -754,16 +754,6 @@ extern (C++) class Dsymbol : ASTNode
     }
 
     /*********************************
-     * If this symbol is really an alias for another,
-     * return that other.
-     * If needed, semantic() is invoked due to resolve forward reference.
-     */
-    Dsymbol toAlias()
-    {
-        return this;
-    }
-
-    /*********************************
      * Resolve recursive tuple expansion in eponymous template.
      */
     Dsymbol toAlias2()

@@ -8926,3 +8926,197 @@ private extern(C++) class HasPointersVisitor : Visitor
         result = ns.members.foreachDsymbol( (s) { return s.hasPointers(); } ) != 0;
     }
 }
+
+/*********************************
+* If this symbol is really an alias for another,
+* return that other.
+* If needed, semantic() is invoked due to resolve forward reference.
+*/
+Dsymbol toAlias(Dsymbol d)
+{
+    scope v = new ToAliasVisitor();
+    d.accept(v);
+    return v.result;
+}
+
+private extern(C++) class ToAliasVisitor : Visitor
+{
+    import dmd.mtype : Type;
+
+    alias visit = Visitor.visit;
+    Dsymbol result;
+
+    override void visit(Dsymbol d)
+    {
+        result = d;
+    }
+
+    override void visit(TemplateInstance ti)
+    {
+        static if (LOG)
+        {
+            printf("TemplateInstance.toAlias()\n");
+        }
+        if (!ti.inst)
+        {
+            // Maybe we can resolve it
+            if (ti._scope)
+            {
+                dsymbolSemantic(ti, ti._scope);
+            }
+            if (!ti.inst)
+            {
+                .error(ti.loc, "%s `%s` cannot resolve forward reference", ti.kind, ti.toPrettyChars);
+                ti.errors = true;
+                result = ti;
+                return;
+            }
+        }
+
+        if (ti.inst != ti)
+        {
+            result = ti.inst.toAlias();
+            return;
+        }
+
+        if (ti.aliasdecl)
+        {
+            result = ti.aliasdecl.toAlias();
+            return;
+        }
+
+        result = ti.inst;
+    }
+
+    override void visit(Import i)
+    {
+        if (i.aliasId)
+        {
+            result = i.mod;
+            return;
+        }
+        result = i;
+    }
+
+    override void visit(VarDeclaration vd)
+    {
+        //printf("VarDeclaration::toAlias('%s', this = %p, aliassym = %p)\n", toChars(), this, aliassym);
+        if ((!vd.type || !vd.type.deco) && vd._scope)
+            dsymbolSemantic(vd, vd._scope);
+
+        assert(vd != vd.aliasTuple);
+        Dsymbol s = vd.aliasTuple ? vd.aliasTuple.toAlias() : vd;
+        result = s;
+    }
+
+    override void visit(AliasDeclaration ad)
+    {
+        static if (0)
+        printf("[%s] AliasDeclaration::toAlias('%s', this = %p, aliassym: %s, kind: '%s', inuse = %d)\n",
+            loc.toChars(), toChars(), ad, ad.aliassym ? ad.aliassym.toChars() : "", ad.aliassym ? ad.aliassym.kind() : "", inuse);
+        assert(ad != ad.aliassym);
+        //static int count; if (++count == 10) *(char*)0=0;
+
+        Dsymbol err()
+        {
+            // Avoid breaking "recursive alias" state during errors gagged
+            if (global.gag)
+                return ad;
+            ad.aliassym = new AliasDeclaration(ad.loc, ad.ident, Type.terror);
+            ad.type = Type.terror;
+            return ad.aliassym;
+        }
+        // Reading the AliasDeclaration
+        if (!ad.ignoreRead)
+            ad.wasRead = true;                 // can never assign to this AliasDeclaration again
+
+        if (ad.inuse == 1 && ad.type && ad._scope)
+        {
+            ad.inuse = 2;
+            const olderrors = global.errors;
+            Dsymbol s = ad.type.toDsymbol(ad._scope);
+            //printf("[%s] type = %s, s = %p, this = %p\n", loc.toChars(), type.toChars(), s, this);
+            if (global.errors != olderrors)
+            {
+                result = err();
+                return;
+            }
+            if (s)
+            {
+                s = s.toAlias();
+                if (global.errors != olderrors)
+                {
+                    result = err();
+                    return;
+                }
+                ad.aliassym = s;
+                ad.inuse = 0;
+            }
+            else
+            {
+                Type t = ad.type.typeSemantic(ad.loc, ad._scope);
+                if (t.ty == Terror)
+                {
+                    result = err();
+                    return;
+                }
+                if (global.errors != olderrors)
+                {
+                    result = err();
+                    return;
+                }
+                //printf("t = %s\n", t.toChars());
+                ad.inuse = 0;
+            }
+        }
+        if (ad.inuse)
+        {
+            .error(ad.loc, "%s `%s` recursive alias declaration", ad.kind, ad.toPrettyChars);
+            result = err();
+            return;
+        }
+
+        if (ad.semanticRun >= PASS.semanticdone)
+        {
+            // semantic is already done.
+
+            // Do not see aliassym !is null, because of lambda aliases.
+
+            // Do not see type.deco !is null, even so "alias T = const int;` needs
+            // semantic analysis to take the storage class `const` as type qualifier.
+        }
+        else
+        {
+            // stop AliasAssign tuple building
+            if (ad.aliassym)
+            {
+                if (auto td = ad.aliassym.isTupleDeclaration())
+                {
+                    if (td.building)
+                    {
+                        td.building = false;
+                        ad.semanticRun = PASS.semanticdone;
+                        result = td;
+                        return;
+                    }
+                }
+            }
+            if (ad._import && ad._import._scope)
+            {
+                /* If this is an internal alias for selective/renamed import,
+                 * load the module first.
+                 */
+                ad._import.dsymbolSemantic(null);
+            }
+            if (ad._scope)
+            {
+                aliasSemantic(ad, ad._scope);
+            }
+        }
+
+        ad.inuse = 1;
+        Dsymbol s = ad.aliassym ? ad.aliassym.toAlias() : ad;
+        ad.inuse = 0;
+        result = s;
+    }
+}

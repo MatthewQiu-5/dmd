@@ -1,0 +1,13 @@
+{
+	"authors": [
+		"Matthew Qiu"
+	],
+	"dependencies": {
+		"dmd": "~>2.111.0",
+		"libdparse": "~>0.7"
+	},
+	"description": "A tool to analyze semantic dependencies for the DMD compiler.",
+	"mainSourceFile": "source/dep_analyzer.d",
+	"name": "dep_analyzer",
+	"targetType": "executable"
+}
